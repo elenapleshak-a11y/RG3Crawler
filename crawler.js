@@ -478,6 +478,59 @@ class SEOAdvancedCrawler {
             stats: this.stats
         };
     }
+
+    saveToLocalStorage(siteKey) {
+        const data = {
+            baseUrl: this.config.baseUrl,
+            pages: Array.from(this.visitedUrls.values()),
+            externalLinks: Array.from(this.externalLinks.entries()),
+            brokenLinks: Array.from(this.brokenLinks.entries()),
+            files: Array.from(this.files.entries()),
+            stats: this.stats,
+            timestamp: new Date().toISOString()
+        };
+        
+        localStorage.setItem(`seo_crawl_${siteKey}`, JSON.stringify(data));
+        this.log(`💾 Данные сохранены: ${siteKey}`, 'success');
+    }
+
+    loadFromLocalStorage(siteKey) {
+        const data = localStorage.getItem(`seo_crawl_${siteKey}`);
+        if (data) {
+            const parsed = JSON.parse(data);
+            this.log(`📂 Загружены данные: ${siteKey} (${parsed.pages.length} страниц)`, 'success');
+            return parsed;
+        }
+        return null;
+    }
+
+    getCrawlData() {
+        return {
+            baseUrl: this.config.baseUrl,
+            pages: Array.from(this.visitedUrls.values()),
+            externalLinks: Array.from(this.externalLinks.entries()),
+            brokenLinks: Array.from(this.brokenLinks.entries()),
+            files: Array.from(this.files.entries()),
+            stats: this.stats,
+            timestamp: new Date().toISOString()
+        };
+    }
+}
+
+// Добавляем кнопку сохранения в UI
+function addSaveButton() {
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = '💾 Сохранить данные';
+    saveBtn.onclick = saveCrawlData;
+    document.querySelector('.export-buttons').appendChild(saveBtn);
+}
+
+function saveCrawlData() {
+    const siteKey = prompt('Введите название для сохранения (например: old_site):');
+    if (siteKey) {
+        seoAdvancedCrawler.saveToLocalStorage(siteKey);
+    }
+}
 }
 
 // Глобальный инстанс краулера
