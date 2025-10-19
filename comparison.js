@@ -473,16 +473,67 @@ function addCompareLog(message, type = 'info') {
     logElement.scrollTop = logElement.scrollHeight;
 }
 
-function showComparisonResults(results) {
-    document.getElementById('compareProgressSection').style.display = 'none';
-    document.getElementById('compareResultsSection').style.display = 'block';
+function showComparisonSummary(results) {
+    const summary = results.summary;
+    const statsHtml = `
+        <div class="final-stats">
+            <div class="stat-item">📊 <strong>Всего сравнено:</strong> ${summary.totalCompared} страниц</div>
+            <div class="stat-item">✅ <strong>Идентичных:</strong> ${summary.identical}</div>
+            <div class="stat-item">⚠️ <strong>С отличиями:</strong> ${summary.withDifferences}</div>
+            <div class="stat-item">❌ <strong>Отсутствует на новом:</strong> ${summary.missingOnNew}</div>
+            <div class="stat-item">🆕 <strong>Новых страниц:</strong> ${summary.missingOnOld}</div>
+            <div class="stat-item">🔀 <strong>Редиректов:</strong> ${summary.redirectsFound}</div>
+            <div class="stat-item">🚫 <strong>Битых ссылок:</strong> ${summary.brokenLinksFound}</div>
+            <div class="stat-item">🚨 <strong>Критических предупреждений:</strong> ${summary.criticalWarnings}</div>
+        </div>
+    `;
     
-    showComparisonSummary(results);
-    showComparisonTable(results);
-    showRedirectsTable(results);
-    showBrokenLinksTable(results);
-    showMissingPagesTables(results);
-    showWarningsList(results);
+    document.getElementById('compareResultsStats').innerHTML = statsHtml;
+    
+    // ДОБАВЛЯЕМ КАРТОЧКИ СВОДКИ
+    const summaryCards = document.getElementById('summaryCards');
+    const matchPercentage = summary.totalCompared > 0 ? Math.round((summary.identical / summary.totalCompared) * 100) : 0;
+    
+    summaryCards.innerHTML = `
+        <div class="summary-cards-grid">
+            <div class="summary-card ${matchPercentage >= 90 ? 'success' : matchPercentage >= 70 ? 'warning' : 'error'}">
+                <div class="summary-card-number">${matchPercentage}%</div>
+                <div class="summary-card-label">Совпадение</div>
+            </div>
+            <div class="summary-card ${summary.missingOnNew === 0 ? 'success' : 'error'}">
+                <div class="summary-card-number">${summary.missingOnNew}</div>
+                <div class="summary-card-label">Потеряно страниц</div>
+            </div>
+            <div class="summary-card ${summary.brokenLinksFound === 0 ? 'success' : 'error'}">
+                <div class="summary-card-number">${summary.brokenLinksFound}</div>
+                <div class="summary-card-label">Битых ссылок</div>
+            </div>
+            <div class="summary-card ${summary.criticalWarnings === 0 ? 'success' : 'error'}">
+                <div class="summary-card-number">${summary.criticalWarnings}</div>
+                <div class="summary-card-label">Критических ошибок</div>
+            </div>
+        </div>
+        
+        <!-- ДОПОЛНИТЕЛЬНЫЕ КАРТОЧКИ -->
+        <div class="summary-cards-grid" style="margin-top: 20px;">
+            <div class="summary-card ${summary.redirectsFound === 0 ? 'success' : 'warning'}">
+                <div class="summary-card-number">${summary.redirectsFound}</div>
+                <div class="summary-card-label">Редиректов</div>
+            </div>
+            <div class="summary-card ${summary.missingOnOld === 0 ? 'success' : 'info'}">
+                <div class="summary-card-number">${summary.missingOnOld}</div>
+                <div class="summary-card-label">Новых страниц</div>
+            </div>
+            <div class="summary-card ${summary.withDifferences === 0 ? 'success' : 'warning'}">
+                <div class="summary-card-number">${summary.withDifferences}</div>
+                <div class="summary-card-label">С отличиями</div>
+            </div>
+            <div class="summary-card info">
+                <div class="summary-card-number">${summary.totalCompared}</div>
+                <div class="summary-card-label">Всего проверено</div>
+            </div>
+        </div>
+    `;
 }
 
 function showComparisonSummary(results) {
