@@ -3,107 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEO Migration Auditor - Базовый краулер</title>
+    <title>SEO Migration Auditor - Сравнение сайтов</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>🔍 SEO Migration Auditor</h1>
-        <p class="subtitle">Этап 1: Базовый краулер для аудита сайта</p>
+        <p class="subtitle">Этап 3: Сравнение старого и нового сайтов</p>
         
-        <div class="input-section">
-            <div class="input-group">
-                <label for="urlInput">URL сайта для анализа:</label>
-                <input type="url" id="urlInput" placeholder="https://example.com" required>
-            </div>
-            
-            <div class="settings-grid">
+        <!-- НАВИГАЦИЯ МЕЖДУ РЕЖИМАМИ -->
+        <div class="mode-navigation">
+            <button class="mode-btn active" onclick="switchMode('crawl')">🕷️ Краулинг</button>
+            <button class="mode-btn" onclick="switchMode('compare')">⚖️ Сравнение</button>
+        </div>
+
+        <!-- РЕЖИМ КРАУЛИНГА (существующий) -->
+        <div id="crawlMode" class="mode-content active">
+            <!-- Существующая форма краулинга без изменений -->
+            <div class="input-section">
                 <div class="input-group">
-                    <label for="maxPages">Лимит страниц:</label>
-                    <input type="number" id="maxPages" value="500" min="1" max="10000">
+                    <label for="urlInput">URL сайта для анализа:</label>
+                    <input type="url" id="urlInput" placeholder="https://example.com" required>
                 </div>
                 
-                <div class="input-group">
-                    <label for="crawlDelay">Задержка (мс):</label>
-                    <input type="number" id="crawlDelay" value="200" min="50" max="2000">
+                <div class="settings-grid">
+                    <!-- ... существующие настройки краулинга ... -->
                 </div>
+            </div>
+
+            <div class="controls">
+                <button id="crawlBtn" onclick="startCrawling()">▶️ Запустить краулинг</button>
+                <button id="stopBtn" onclick="stopCrawling()" style="display: none;">⏹️ Остановить</button>
+                <button id="pauseBtn" onclick="togglePause()" style="display: none;">⏸️ Пауза</button>
+            </div>
+
+            <!-- ... остальная часть режима краулинга ... -->
+        </div>
+
+        <!-- НОВЫЙ РЕЖИМ СРАВНЕНИЯ -->
+        <div id="compareMode" class="mode-content">
+            <div class="input-section">
+                <h3>⚖️ Сравнение двух сайтов</h3>
                 
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="noLimit">
-                        🚫 Не учитывать лимит страниц
-                    </label>
-                </div>
-                
-                <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="collectMetadata" checked>
-                        📊 Собирать мета-данные (Title, Description)
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button id="crawlBtn" onclick="startCrawling()">▶️ Запустить краулинг</button>
-            <button id="stopBtn" onclick="stopCrawling()" style="display: none;">⏹️ Остановить</button>
-            <button id="pauseBtn" onclick="togglePause()" style="display: none;">⏸️ Пауза</button>
-        </div>
-
-        <!-- Прогресс -->
-        <div class="progress-section" id="progressSection" style="display: none;">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div class="progress-info" id="progressInfo"></div>
-            
-            <div class="stats-grid" id="statsGrid"></div>
-            
-            <div class="log-container">
-                <h3>Журнал работы:</h3>
-                <div class="log" id="log"></div>
-            </div>
-        </div>
-
-        <!-- Результаты -->
-        <div class="results-section" id="resultsSection" style="display: none;">
-            <h2>✅ Краулинг завершен!</h2>
-            <div class="results-stats" id="resultsStats"></div>
-            
-            <div class="tabs">
-                <button class="tab-button active" onclick="openTab('mainPages')">Основные страницы</button>
-                <button class="tab-button" onclick="openTab('externalLinks')">Внешние ссылки</button>
-                <button class="tab-button" onclick="openTab('brokenLinks')">Битые ссылки</button>
-                <button class="tab-button" onclick="openTab('files')">Файлы</button>
-            </div>
-            
-            <div class="tab-content">
-                <div id="mainPages" class="tab-pane active">
-                    <h3>Основные страницы сайта</h3>
-                    <div class="export-buttons">
-                        <button onclick="exportMainCSV()">📥 Базовый CSV</button>
-                        <button onclick="exportDetailedCSV()">📊 Детальный CSV</button>
-                        <button onclick="exportFullData()">🔮 Полные данные (JSON)</button>
+                <div class="comparison-inputs">
+                    <div class="site-input">
+                        <label for="oldSiteUrl">Старый сайт (исходный):</label>
+                        <input type="url" id="oldSiteUrl" placeholder="https://old-site.com" required>
+                        <div class="site-status" id="oldSiteStatus"></div>
                     </div>
-                    <div class="urls-table" id="mainPagesTable"></div>
+                    
+                    <div class="site-input">
+                        <label for="newSiteUrl">Новый сайт (целевой):</label>
+                        <input type="url" id="newSiteUrl" placeholder="https://new-site.com" required>
+                        <div class="site-status" id="newSiteStatus"></div>
+                    </div>
+                </div>
+
+                <div class="comparison-settings">
+                    <h4>Настройки сравнения:</h4>
+                    <div class="settings-grid">
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="autoMapUrls" checked>
+                                🔄 Автоматическое сопоставление URL
+                            </label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="checkRedirects" checked>
+                                🔀 Проверять редиректы
+                            </label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="checkBrokenLinks" checked>
+                                ❌ Проверять битые ссылки
+                            </label>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="urlMappingFile">Файл сопоставления URL (CSV):</label>
+                            <input type="file" id="urlMappingFile" accept=".csv">
+                            <small>Опционально: CSV с колонками old_url, new_url</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="compareBtn" onclick="startComparison()">⚖️ Начать сравнение</button>
+                <button id="stopCompareBtn" onclick="stopComparison()" style="display: none;">⏹️ Остановить</button>
+            </div>
+
+            <!-- Прогресс сравнения -->
+            <div class="progress-section" id="compareProgressSection" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="compareProgressFill"></div>
+                </div>
+                <div class="progress-info" id="compareProgressInfo"></div>
+                
+                <div class="stats-grid" id="compareStatsGrid"></div>
+                
+                <div class="log-container">
+                    <h3>Журнал сравнения:</h3>
+                    <div class="log" id="compareLog"></div>
+                </div>
+            </div>
+
+            <!-- Результаты сравнения -->
+            <div class="results-section" id="compareResultsSection" style="display: none;">
+                <h2>✅ Сравнение завершено!</h2>
+                <div class="results-stats" id="compareResultsStats"></div>
+                
+                <div class="tabs">
+                    <button class="tab-button active" onclick="openCompareTab('summary')">Сводка</button>
+                    <button class="tab-button" onclick="openCompareTab('comparison')">Сравнение URL</button>
+                    <button class="tab-button" onclick="openCompareTab('redirects')">Редиректы</button>
+                    <button class="tab-button" onclick="openCompareTab('broken')">Битые ссылки</button>
+                    <button class="tab-button" onclick="openCompareTab('missing')">Отсутствующие</button>
+                    <button class="tab-button" onclick="openCompareTab('warnings')">Предупреждения</button>
                 </div>
                 
-                <div id="externalLinks" class="tab-pane">
-                    <h3>Внешние ссылки</h3>
-                    <button onclick="exportExternalCSV()">📥 CSV внешних ссылок</button>
-                    <div class="urls-table" id="externalLinksTable"></div>
-                </div>
-                
-                <div id="brokenLinks" class="tab-pane">
-                    <h3>Битые ссылки (4xx, 5xx)</h3>
-                    <button onclick="exportBrokenCSV()">📥 CSV битых ссылок</button>
-                    <div class="urls-table" id="brokenLinksTable"></div>
-                </div>
-                
-                <div id="files" class="tab-pane">
-                    <h3>Файлы (PDF, изображения и др.)</h3>
-                    <button onclick="exportFilesCSV()">📥 CSV файлов</button>
-                    <div class="urls-table" id="filesTable"></div>
+                <div class="tab-content">
+                    <div id="summary" class="tab-pane active">
+                        <h3>📊 Сводка сравнения</h3>
+                        <div class="summary-cards" id="summaryCards"></div>
+                        <div class="export-buttons">
+                            <button onclick="exportComparisonXLSX()">📊 Excel отчет</button>
+                            <button onclick="exportComparisonJSON()">🔮 JSON данные</button>
+                            <button onclick="exportComparisonSummary()">📋 Сводка (CSV)</button>
+                        </div>
+                    </div>
+                    
+                    <div id="comparison" class="tab-pane">
+                        <h3>🔍 Детальное сравнение URL</h3>
+                        <div class="filter-controls">
+                            <input type="text" id="comparisonFilter" placeholder="Фильтр по URL..." onkeyup="filterComparisonTable()">
+                            <select id="statusFilter" onchange="filterComparisonTable()">
+                                <option value="all">Все статусы</option>
+                                <option value="identical">Идентичные</option>
+                                <option value="differences">Есть отличия</option>
+                                <option value="missing_new">Отсутствуют на новом</option>
+                                <option value="missing_old">Отсутствуют на старом</option>
+                            </select>
+                        </div>
+                        <div class="urls-table" id="comparisonTable"></div>
+                    </div>
+                    
+                    <div id="redirects" class="tab-pane">
+                        <h3>🔀 Редиректы</h3>
+                        <div class="urls-table" id="redirectsTable"></div>
+                    </div>
+                    
+                    <div id="broken" class="tab-pane">
+                        <h3>❌ Битые ссылки на новом сайте</h3>
+                        <div class="urls-table" id="brokenLinksTable"></div>
+                    </div>
+                    
+                    <div id="missing" class="tab-pane">
+                        <h3>📭 Отсутствующие страницы</h3>
+                        <div class="missing-tabs">
+                            <button class="subtab-button active" onclick="openMissingTab('missingNew')">На новом сайте</button>
+                            <button class="subtab-button" onclick="openMissingTab('missingOld')">На старом сайте</button>
+                        </div>
+                        <div class="subtab-content">
+                            <div id="missingNew" class="subtab-pane active">
+                                <div class="urls-table" id="missingNewTable"></div>
+                            </div>
+                            <div id="missingOld" class="subtab-pane">
+                                <div class="urls-table" id="missingOldTable"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="warnings" class="tab-pane">
+                        <h3>⚠️ Критические предупреждения</h3>
+                        <div class="warnings-list" id="warningsList"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -112,5 +190,6 @@
     </div>
 
     <script src="crawler.js"></script>
+    <script src="comparison.js"></script>
 </body>
 </html>
