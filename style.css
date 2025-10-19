@@ -1090,3 +1090,12 @@ a:hover {
         gap: 10px;
     }
 }
+
+.summary-card.info {
+    border-left-color: #17a2b8;
+    background: linear-gradient(135deg, #f0fdff, #d1ecf1);
+}
+
+.summary-card.info .summary-card-number {
+    color: #17a2b8;
+}
