@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Migration Auditor - Базовый краулер</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 SEO Migration Auditor</h1>
+        <p class="subtitle">Этап 1: Базовый краулер для аудита сайта</p>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="urlInput">URL сайта для анализа:</label>
+                <input type="url" id="urlInput" placeholder="https://example.com" required>
+            </div>
+            
+            <div class="settings-grid">
+                <div class="input-group">
+                    <label for="maxPages">Лимит страниц:</label>
+                    <input type="number" id="maxPages" value="500" min="1" max="10000">
+                </div>
+                
+                <div class="input-group">
+                    <label for="crawlDelay">Задержка (мс):</label>
+                    <input type="number" id="crawlDelay" value="200" min="50" max="2000">
+                </div>
+                
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="noLimit">
+                        🚫 Не учитывать лимит страниц
+                    </label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="collectMetadata" checked>
+                        📊 Собирать мета-данные (Title, Description)
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="crawlBtn" onclick="startCrawling()">▶️ Запустить краулинг</button>
+            <button id="stopBtn" onclick="stopCrawling()" style="display: none;">⏹️ Остановить</button>
+            <button id="pauseBtn" onclick="togglePause()" style="display: none;">⏸️ Пауза</button>
+        </div>
+
+        <!-- Прогресс -->
+        <div class="progress-section" id="progressSection" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-info" id="progressInfo"></div>
+            
+            <div class="stats-grid" id="statsGrid"></div>
+            
+            <div class="log-container">
+                <h3>Журнал работы:</h3>
+                <div class="log" id="log"></div>
+            </div>
+        </div>
+
+        <!-- Результаты -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h2>✅ Краулинг завершен!</h2>
+            <div class="results-stats" id="resultsStats"></div>
+            
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab('mainPages')">Основные страницы</button>
+                <button class="tab-button" onclick="openTab('externalLinks')">Внешние ссылки</button>
+                <button class="tab-button" onclick="openTab('brokenLinks')">Битые ссылки</button>
+                <button class="tab-button" onclick="openTab('files')">Файлы</button>
+            </div>
+            
+            <div class="tab-content">
+                <div id="mainPages" class="tab-pane active">
+                    <h3>Основные страницы сайта</h3>
+                    <div class="export-buttons">
+                        <button onclick="exportMainCSV()">📥 CSV основных страниц</button>
+                        <button onclick="exportFullData()">📊 Полные данные (JSON)</button>
+                    </div>
+                    <div class="urls-table" id="mainPagesTable"></div>
+                </div>
+                
+                <div id="externalLinks" class="tab-pane">
+                    <h3>Внешние ссылки</h3>
+                    <button onclick="exportExternalCSV()">📥 CSV внешних ссылок</button>
+                    <div class="urls-table" id="externalLinksTable"></div>
+                </div>
+                
+                <div id="brokenLinks" class="tab-pane">
+                    <h3>Битые ссылки (4xx, 5xx)</h3>
+                    <button onclick="exportBrokenCSV()">📥 CSV битых ссылок</button>
+                    <div class="urls-table" id="brokenLinksTable"></div>
+                </div>
+                
+                <div id="files" class="tab-pane">
+                    <h3>Файлы (PDF, изображения и др.)</h3>
+                    <button onclick="exportFilesCSV()">📥 CSV файлов</button>
+                    <div class="urls-table" id="filesTable"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <script src="crawler.js"></script>
+</body>
+</html>
