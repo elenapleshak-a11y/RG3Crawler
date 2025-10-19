@@ -46,19 +46,75 @@ class SiteComparator {
         }
     }
 
+    // Обновляем метод loadSiteData в SiteComparator
     async loadSiteData(oldSiteUrl, newSiteUrl) {
-        // В реальности здесь будет загрузка данных из localStorage или сервера
-        // Сейчас используем демо-данные
-        
-        this.log('📥 Загрузка данных сайтов...', 'info');
-        
-        // Демо-реализация - в реальности данные будут из краулера
+    this.log('📥 Загрузка данных сайтов...', 'info');
+    
+    // Пробуем загрузить из localStorage
+    const oldData = this.loadCrawlData('old_site');
+    const newData = this.loadCrawlData('new_site');
+    
+    if (oldData && newData) {
+        this.oldSiteData = oldData;
+        this.newSiteData = newData;
+        this.log('✅ Данные загружены из сохраненных результатов', 'success');
+    } else {
+        // Используем демо-данные или запускаем краулинг
+        this.log('ℹ️ Сохраненные данные не найдены, используем демо-режим', 'info');
         this.oldSiteData = this.getDemoSiteData(oldSiteUrl, 'old');
         this.newSiteData = this.getDemoSiteData(newSiteUrl, 'new');
-        
-        this.log(`✅ Загружено: ${this.oldSiteData.pages.length} страниц со старого сайта`, 'success');
-        this.log(`✅ Загружено: ${this.newSiteData.pages.length} страниц с нового сайта`, 'success');
     }
+    
+    this.log(`✅ Загружено: ${this.oldSiteData.pages.length} страниц со старого сайта`, 'success');
+    this.log(`✅ Загружено: ${this.newSiteData.pages.length} страниц с нового сайта`, 'success');
+}
+
+loadCrawlData(siteKey) {
+    const data = localStorage.getItem(`seo_crawl_${siteKey}`);
+    if (data) {
+        return JSON.parse(data);
+    }
+    return null;
+}
+
+// Добавляем функцию для запуска краулинга перед сравнением
+async function crawlAndCompare() {
+    const oldSiteUrl = document.getElementById('oldSiteUrl').value.trim();
+    const newSiteUrl = document.getElementById('newSiteUrl').value.trim();
+    
+    if (!oldSiteUrl || !newSiteUrl) {
+        showError('Укажите URL обоих сайтов');
+        return;
+    }
+    
+    const crawlFirst = confirm('Запустить краулинг обоих сайтов перед сравнением?');
+    
+    if (crawlFirst) {
+        // Переключаемся в режим краулинга
+        switchMode('crawl');
+        
+        // Сохраняем URL для последующего использования
+        localStorage.setItem('comparison_old_url', oldSiteUrl);
+        localStorage.setItem('comparison_new_url', newSiteUrl);
+        
+        alert('Запустите краулинг для старого сайта, затем для нового. После завершения вернитесь в режим сравнения.');
+    } else {
+        // Используем демо-данные
+        startComparison();
+    }
+}
+
+// Обновляем startComparison
+function startComparison() {
+    const oldSiteUrl = document.getElementById('oldSiteUrl').value.trim();
+    const newSiteUrl = document.getElementById('newSiteUrl').value.trim();
+    
+    // Сохраняем URL в localStorage
+    localStorage.setItem('comparison_old_url', oldSiteUrl);
+    localStorage.setItem('comparison_new_url', newSiteUrl);
+    
+    // ... остальной код без изменений
+}
 
     getDemoSiteData(baseUrl, type) {
         // Демо-данные - в реальности будут данные из краулера
